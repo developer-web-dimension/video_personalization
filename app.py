@@ -25,7 +25,7 @@ timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
 class VideoRequest(BaseModel):
     name: str
-    language: str  # english | hindi
+    language: str  
 
 
 def add_bottom_text(
@@ -34,7 +34,7 @@ def add_bottom_text(
     name,
     language,
     font_size=90,
-    left_margin=120,
+    left_margin=150,
     bottom_margin=400,
     box_padding=40,
 ):
@@ -123,7 +123,7 @@ def generate_video(data: VideoRequest):
     try:
         os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-        # ✅ Step 1: Pick random video
+        # ✅ Step 1: Pick random video  
         videos = [f for f in os.listdir(INPUT_DIR) if f.endswith(".mp4")]
         if not videos:
             raise ValueError("No videos found in input folder")
@@ -138,7 +138,7 @@ def generate_video(data: VideoRequest):
         os.makedirs(video_folder, exist_ok=True)
 
         # ✅ Step 3: Save processed video INSIDE that folder
-        processed_video_path = os.path.join(video_folder, chosen_video)
+        processed_video_path = os.path.join(video_folder, "2.mp4")
 
         add_bottom_text(
             input_path=input_video_path,
