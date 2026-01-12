@@ -16,8 +16,8 @@ FONT_MAP = {
 }
 
 PREFIX_MAP = {
-    "english": "Tiger Hero",
-    "hindi": "टाइगर हीरो"
+    "english": f"Tiger Hero",
+    "hindi": f"टाइगर हीरो"
 }
 
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -33,7 +33,7 @@ def add_bottom_text(
     output_path,
     name,
     language,
-    font_size=90,
+    font_size=85,
     left_margin=150,
     bottom_margin=400,
     box_padding=40,
@@ -45,7 +45,7 @@ def add_bottom_text(
 
     fontfile = FONT_MAP[language]
     prefix = PREFIX_MAP[language]
-    final_text = f"{prefix} {name}"
+    final_text = f"{prefix}\n{name}"
 
     safe_text = (
         final_text.replace("\\", "\\\\")
@@ -61,8 +61,10 @@ def add_bottom_text(
         text=safe_text,
         fontsize=font_size,
         fontcolor="black",
-        x=left_margin,
+        x="(w-text_w)/2",
         y=f"h-text_h-{bottom_margin}",
+        text_align="center",
+        line_spacing=0,
         box=1,
         boxcolor="ffc000@0.85",
         boxborderw=box_padding,
@@ -70,6 +72,7 @@ def add_bottom_text(
         shadowy=2,
         shadowcolor="black@0.35"
     )
+
 
     (
         ffmpeg
