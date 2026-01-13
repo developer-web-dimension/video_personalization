@@ -4,6 +4,11 @@ import random
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from datetime import datetime
+import asyncio
+from concurrent.futures import ProcessPoolExecutor
+
+executor = ProcessPoolExecutor(max_workers=os.cpu_count())
+print(f"CPU_cores {os.cpu_count()}")
 
 app = FastAPI()
 
@@ -88,6 +93,7 @@ def add_bottom_text(
             vcodec="libx264",
             acodec="copy",
             pix_fmt="yuv420p",
+            preset="fast",
             movflags="faststart"
         )
         .overwrite_output()
@@ -126,8 +132,7 @@ def concat_all_videos(folder_path, output_path):
     )
 
 
-@app.post("/generate-video")
-def generate_video(data: VideoRequest):
+def video_pipeline(data: VideoRequest):
     try:
         os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -180,6 +185,23 @@ def generate_video(data: VideoRequest):
             "saved_in_folder": video_folder,
             "final_output": final_output
         }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/generate-video")
+async def generate_video(data: VideoRequest):
+    try:
+        loop = asyncio.get_running_loop()
+
+        result = await loop.run_in_executor(
+            executor,
+            video_pipeline,
+            data
+        )
+
+        return result
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
