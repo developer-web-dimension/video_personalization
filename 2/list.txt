@@ -1,3 +1,0 @@
-file 'C:\webd\add_text_in_video\2\1.mp4'
-file 'C:\webd\add_text_in_video\2\2.mp4'
-file 'C:\webd\add_text_in_video\2\3.mp4'
