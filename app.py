@@ -7,7 +7,11 @@ from datetime import datetime
 
 app = FastAPI()
 
-INPUT_DIR = "input_video"
+INPUT_DIR_MAP = {
+    "boy": "input_boy",
+    "girl": "input_girl"
+}
+
 OUTPUT_DIR = "output"
 
 FONT_MAP = {
@@ -25,7 +29,8 @@ timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
 class VideoRequest(BaseModel):
     name: str
-    language: str  
+    language: str 
+    gender: str 
 
 
 def add_bottom_text(
@@ -126,15 +131,26 @@ def generate_video(data: VideoRequest):
     try:
         os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-        # ✅ Step 1: Pick random video  
-        videos = [f for f in os.listdir(INPUT_DIR) if f.endswith(".mp4")]
+        gender = data.gender.lower()
+
+        if gender not in INPUT_DIR_MAP:
+            raise ValueError("Invalid gender. Use 'boy' or 'girl'")
+
+        input_dir = INPUT_DIR_MAP[gender]
+
+        # ✅ Step 1: Pick random video from gender folder
+        videos = [
+            f for f in os.listdir(input_dir)
+            if f.endswith(".mp4")
+        ]
+
         if not videos:
             raise ValueError("No videos found in input folder")
 
         chosen_video = random.choice(videos)
         video_name = os.path.splitext(chosen_video)[0]
 
-        input_video_path = os.path.join(INPUT_DIR, chosen_video)
+        input_video_path = os.path.join(input_dir, chosen_video)
 
         # ✅ Step 2: Create folder with video name
         video_folder = video_name
@@ -151,7 +167,7 @@ def generate_video(data: VideoRequest):
         )
 
         # ✅ Step 4: Concat videos inside that folder
-        final_output = os.path.join(OUTPUT_DIR, f"{timestamp}_final.mp4")
+        final_output = os.path.join(OUTPUT_DIR, f"{timestamp}_{gender}_final.mp4")
 
         concat_all_videos(
             folder_path=video_folder,
