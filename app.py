@@ -37,16 +37,33 @@ class VideoRequest(BaseModel):
     language: str 
     gender: str 
 
+def normalize_video(input_path, output_path, width=540, height=960):
+    (
+        ffmpeg
+        .input(input_path)
+        .video
+        .filter("scale", width, height)
+        .output(
+            output_path,
+            vcodec="libx264",
+            pix_fmt="yuv420p",
+            crf=25,
+            preset="fast",
+            acodec="copy"
+        )
+        .overwrite_output()
+        .run()
+    )
+
 
 def add_bottom_text(
     input_path,
     output_path,
     name,
     language,
-    font_size=85,
-    left_margin=150,
-    bottom_margin=400,
-    box_padding=40,
+    font_size=50,
+    bottom_margin=200,
+    box_padding=20,
 ):
     language = language.lower()
 
@@ -65,23 +82,23 @@ def add_bottom_text(
 
     inp = ffmpeg.input(input_path)
 
-    video = inp.video.filter(
-        "drawtext",
-        fontfile=fontfile,
-        text=safe_text,
-        fontsize=font_size,
-        fontcolor="black",
-        x="(w-text_w)/2",
-        y=f"h-text_h-{bottom_margin}",
-        text_align="center",
-        line_spacing=0,
-        text_shaping=1,
-        box=1,
-        boxcolor="ffc000@0.85",
-        boxborderw=box_padding,
-        shadowx=2,
-        shadowy=2,
-        shadowcolor="black@0.35"
+    video = inp.video.filter("scale", "iw/2", "-2").filter(
+            "drawtext",
+            fontfile=fontfile,
+            text=safe_text,
+            fontsize=font_size,
+            fontcolor="black",
+            x="(w-text_w)/2",
+            y=f"h-text_h-{bottom_margin}",
+            text_align="center",
+            line_spacing=0,
+            text_shaping=1,
+            box=1,
+            boxcolor="ffc000@0.85",
+            boxborderw=box_padding,
+            shadowx=2,
+            shadowy=2,
+            shadowcolor="black@0.35"
     )
 
 
@@ -94,7 +111,8 @@ def add_bottom_text(
             vcodec="libx264",
             acodec="copy",
             pix_fmt="yuv420p",
-            preset="fast",
+            crf=25,
+            preset="slow",
             movflags="faststart"
         )
         .overwrite_output()
@@ -115,7 +133,10 @@ def concat_all_videos(folder_path, output_path):
     streams = []
     for v in videos:
         inp = ffmpeg.input(v)
-        streams.extend([inp.video, inp.audio])
+        v_stream = inp.video.filter("scale", 540, 960)
+        a_stream = inp.audio
+        # streams.extend([inp.video, inp.audio])
+        streams.extend([v_stream, a_stream])
 
     (
         ffmpeg
