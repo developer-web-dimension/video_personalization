@@ -21,7 +21,7 @@ OUTPUT_DIR = "output"
 
 FONT_MAP = {
     "english": "font/Gotham Bold.otf",
-    "hindi": "font/devnagri.ttf"
+    "hindi": "font/NotoSansDevanagari-VariableFont_wdth,wght.ttf"
 }
 
 PREFIX_MAP = {
@@ -75,6 +75,7 @@ def add_bottom_text(
         y=f"h-text_h-{bottom_margin}",
         text_align="center",
         line_spacing=0,
+        text_shaping=1,
         box=1,
         boxcolor="ffc000@0.85",
         boxborderw=box_padding,
@@ -210,4 +211,3 @@ async def generate_video(data: VideoRequest):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
-
